@@ -162,10 +162,11 @@ export async function v1Login(
             } catch {
                 // ignore
             }
-            if (data && data.token) {
-                return { token: data.token };
+            const d = data as { token?: string; status?: string; message?: string };
+            if (d && d.token) {
+                return { token: d.token };
             }
-            if (data && data.status === 'fail') {
+            if (d && d.status === 'fail') {
                 throw new ZentaoError('E1003');
             }
         } else if (response.status === 401 || response.status === 403) {
