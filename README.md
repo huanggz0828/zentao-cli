@@ -36,6 +36,9 @@ npm install -g zentao-cli
 # npx zentao-cli             # ← 通过 npx 免安装运行
 # pnpm dlx zentao-cli        # ← 通过 pnpm 免安装运行
 
+# 从 GitHub Release 安装指定编译好的版本（适用于没有公开 npm 镜像且无本地编译环境）
+# npm install -g https://github.com/huanggz0828/zentao-cli/releases/download/v<version>/zentao-cli-<version>.tgz
+
 # 首次使用需要进行登录
 zentao login -s https://zentao.example.com -u admin -p 123456
 
