@@ -29,6 +29,9 @@ export interface ModuleActionOptions extends GlobalOptions {
     /** 过滤条件，适用于 resultType 为 list 的模块操作 */
     filter?: string[];
 
+    /** 浏览/过滤类型，例如 unclosed, assignedtome，适用于 resultType 为 list 的模块操作 */
+    browseType?: string;
+
     /** 排序条件，适用于 resultType 为 list 的模块操作 */
     sort?: string;
 

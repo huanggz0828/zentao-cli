@@ -42,6 +42,8 @@ export interface UserConfig {
     silent?: boolean;
     /** JSON 输出是否美化（带缩进） */
     jsonPretty?: boolean;
+    /** API 接口版本，'v1' | 'v2'，默认为 'v2' */
+    apiVersion?: 'v1' | 'v2';
 }
 
 /** 禅道服务端配置 */
@@ -77,6 +79,8 @@ export interface Profile {
     account: string;
     /** API Token，通过登录接口获取 */
     token: string;
+    /** v1 API 的 sessionID，用于 zentaosid 认证 */
+    sessionId?: string;
     /** 登录后获取的用户详情 */
     user?: Record<string, unknown>;
     /** 登录时间 (ISO 8601) */

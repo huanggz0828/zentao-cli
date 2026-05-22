@@ -20,7 +20,7 @@ export function pickFieldsSingle(data: Record<string, unknown>, fields: string[]
     return picked;
 }
 
-type FilterOperator = ':' | '!=' | '>' | '<' | '>=' | '<=' | '~' | '!~';
+type FilterOperator = '=' | ':' | '!=' | '>' | '<' | '>=' | '<=' | '~' | '!~';
 
 interface FilterCondition {
     field: string;
@@ -29,7 +29,7 @@ interface FilterCondition {
 }
 
 /** 较长运算符优先匹配，避免 `!=` 被拆成 `!` 与 `=` */
-const OPERATORS: FilterOperator[] = ['!=', '>=', '<=', '!~', '>', '<', '~', ':'];
+const OPERATORS: FilterOperator[] = ['!=', '>=', '<=', '!~', '>', '<', '~', ':', '='];
 
 /** 解析单条 `--filter` 表达式为 AND 条件列表 */
 function parseFilterExpression(expr: string): FilterCondition[] {
@@ -93,6 +93,7 @@ function matchCondition(item: Record<string, unknown>, condition: FilterConditio
     const filterValue = condition.value;
 
     switch (condition.operator) {
+        case '=':
         case ':':
             return itemValue === filterValue;
         case '!=':

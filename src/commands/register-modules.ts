@@ -12,6 +12,7 @@ export function addDataOptions(cmd: Command): Command {
     return cmd
         .option('--pick <fields>', '摘取指定字段（逗号分隔）')
         .option('--filter <expr>', '过滤条件', collect, [])
+        .option('--browseType <type>', '列表浏览/过滤类型')
         .option('--sort <expr>', '排序条件')
         .option('--search <keywords>', '搜索关键词', collect, [])
         .option('--search-fields <fields>', '搜索字段（逗号分隔）')

@@ -1,12 +1,15 @@
 import { ZentaoClient } from '../api/client.js';
 import type { LoginResponse, ApiResponse, ServerConfig } from '../types/index.js';
 import { ZentaoError } from '../errors.js';
+import { v1Login } from './v1-login.js';
 
 /** 密码登录成功后的结果 */
 export interface LoginResult {
     token: string;
     user?: Record<string, unknown>;
     serverConfig?: ServerConfig;
+    sessionId?: string;
+    apiVersion?: 'v1' | 'v2';
 }
 
 /** 从环境变量读取的凭证片段（任一字段可能缺失） */
@@ -25,8 +28,39 @@ export async function login(
     serverUrl: string,
     account: string,
     password: string,
-    options?: { insecure?: boolean; timeout?: number },
+    options?: { insecure?: boolean; timeout?: number; apiVersion?: 'v1' | 'v2' },
 ): Promise<LoginResult> {
+    if (options?.apiVersion === 'v1') {
+        const v1Result = await v1Login(serverUrl, account, password, options);
+        const tokenVal = v1Result.token ?? v1Result.sessionId ?? '';
+        const client = new ZentaoClient(serverUrl, tokenVal, {
+            ...options,
+            apiVersion: 'v1',
+            sessionId: v1Result.sessionId,
+            serverConfig: v1Result.serverConfig
+        });
+        let user: Record<string, unknown> | undefined = v1Result.user;
+        let serverConfig: ServerConfig | undefined = v1Result.serverConfig;
+        try {
+            const fetchedConfig = await client.getServerConfig();
+            serverConfig = { ...serverConfig, ...fetchedConfig };
+            if (!user) {
+                const usersResp = await client.get<ApiResponse>('/users', { browseType: 'inside', recPerPage: 100 });
+                const users = usersResp.users as Array<Record<string, unknown>> | undefined;
+                user = users?.find((u) => u.account === account);
+            }
+        } catch (error) {
+            // Ignore
+        }
+        return {
+            token: tokenVal,
+            sessionId: v1Result.sessionId,
+            user,
+            serverConfig,
+            apiVersion: 'v1',
+        };
+    }
+
     const url = serverUrl.replace(/\/+$/, '');
     const baseUrl = `${url}/api.php/v2`;
 

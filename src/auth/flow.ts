@@ -25,6 +25,9 @@ export async function ensureAuth(options?: { insecure?: boolean; timeout?: numbe
         const clientOpts = {
             insecure: options?.insecure ?? config.insecure,
             timeout: options?.timeout ?? config.timeout,
+            apiVersion: config.apiVersion,
+            sessionId: currentProfile.sessionId,
+            serverConfig: currentProfile.serverConfig,
         };
         currentProfile.lastUsedTime = new Date().toISOString();
         saveProfile(currentProfile);
@@ -37,10 +40,24 @@ export async function ensureAuth(options?: { insecure?: boolean; timeout?: numbe
     const env = getEnvCredentials();
     if (env.url && env.account && (!currentProfile || (currentProfile.account === env.account && currentProfile.server === env.url))) {
         if (env.token) {
-            const clientOpts = { insecure: options?.insecure, timeout: options?.timeout };
             const normalizedServer = env.url.replace(/\/+$/, '');
             const existingProfile = getProfile(env.account, normalizedServer);
-            const profile = buildProfile(env.url, env.account, env.token, undefined, undefined, existingProfile);
+            const envApiVersion = (process.env.ZENTAO_API_VERSION === 'v1' || process.env.ZENTAO_API_VERSION === 'v2')
+                ? process.env.ZENTAO_API_VERSION
+                : undefined;
+            const apiVersion = envApiVersion ?? existingProfile?.config?.apiVersion;
+            const sessionId = apiVersion === 'v1' ? env.token : undefined;
+
+            const clientOpts = {
+                insecure: options?.insecure,
+                timeout: options?.timeout,
+                apiVersion,
+                sessionId,
+            };
+            const profile = buildProfile(env.url, env.account, env.token, undefined, undefined, existingProfile, {
+                apiVersion,
+                sessionId,
+            });
             saveProfile(profile);
             return {
                 client: new ZentaoClient(env.url, env.token, clientOpts),
@@ -49,12 +66,26 @@ export async function ensureAuth(options?: { insecure?: boolean; timeout?: numbe
         }
 
         if (env.password) {
-            const clientOpts = { insecure: options?.insecure, timeout: options?.timeout };
+            const normalizedServer = env.url.replace(/\/+$/, '');
+            const existingProfile = getProfile(env.account, normalizedServer);
+            const envApiVersion = (process.env.ZENTAO_API_VERSION === 'v1' || process.env.ZENTAO_API_VERSION === 'v2')
+                ? process.env.ZENTAO_API_VERSION
+                : undefined;
+            const apiVersion = envApiVersion ?? existingProfile?.config?.apiVersion;
+
+            const clientOpts = {
+                insecure: options?.insecure,
+                timeout: options?.timeout,
+                apiVersion,
+            };
             const result = await login(env.url, env.account, env.password, clientOpts);
-            const profile = buildProfile(env.url, env.account, result.token, undefined, result.user);
+            const profile = buildProfile(env.url, env.account, result.token, result.serverConfig, result.user, existingProfile, {
+                apiVersion: result.apiVersion,
+                sessionId: result.sessionId,
+            });
             saveProfile(profile);
             return {
-                client: new ZentaoClient(env.url, result.token, clientOpts),
+                client: new ZentaoClient(env.url, result.token, { ...clientOpts, sessionId: result.sessionId }),
                 profile,
             };
         }

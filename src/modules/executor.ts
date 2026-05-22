@@ -10,6 +10,7 @@ import type {
 import { filterData, pickFields, pickFieldsSingle, searchData, sortData } from '../utils/data.js';
 import { convertHtmlFields, convertHtmlFieldsInArray } from '../utils/html.js';
 import { extractPager, extractResult, resolveModuleCommand } from './resolver.js';
+import { getCurrentProfile } from '../config/store.js';
 
 export interface ModuleExecutionResult {
     command: ResolvedModuleCommand;
@@ -56,6 +57,28 @@ export async function executeResolvedModuleCommand(
         if (config.htmlToMarkdown !== false) {
             data = convertHtmlFieldsInArray(data);
         }
+        
+        // 针对禅道 v1 API 的 browseType 兼容处理：由于 v1 接口通常不支持在服务端通过 browseType 过滤，我们在客户端进行模拟过滤
+        const isV1 = !!(client as any).v1Client || client.baseUrl.endsWith('/api.php/v1') || client.baseUrl.endsWith('/index.php');
+        if (isV1 && command.module === 'bug' && command.action.name === 'list') {
+            const browseType = command.query?.browseType ?? 'unclosed';
+            if (browseType !== 'all') {
+                if (browseType === 'unclosed') {
+                    data = data.filter((item) => item.status !== 'closed');
+                } else if (browseType === 'assignedtome' || browseType === 'openedbyme') {
+                    const profile = getCurrentProfile();
+                    const account = profile?.account;
+                    if (account) {
+                        if (browseType === 'assignedtome') {
+                            data = data.filter((item) => String(item.assignedTo ?? '') === account);
+                        } else if (browseType === 'openedbyme') {
+                            data = data.filter((item) => String(item.openedBy ?? '') === account);
+                        }
+                    }
+                }
+            }
+        }
+
         if (options.filter?.length) {
             data = filterData(data, options.filter);
         }

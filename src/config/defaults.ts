@@ -13,6 +13,7 @@ export const DEFAULT_CONFIG: Required<UserConfig> = {
     pagers: {},
     silent: false,
     jsonPretty: false,
+    apiVersion: 'v1',
 };
 
 /** `zentao config set` 允许设置的配置项名称列表 */

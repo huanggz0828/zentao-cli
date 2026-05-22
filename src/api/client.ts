@@ -1,5 +1,6 @@
 import { ZentaoError } from '../errors.js';
 import type { ApiResponse, RequestOptions, ServerConfig } from '../types/index.js';
+import { ZentaoV1Client } from './v1-client.js';
 
 /** 创建 {@link ZentaoClient} 时的可选行为（TLS、超时等） */
 export interface ClientOptions {
@@ -18,14 +19,28 @@ export class ZentaoClient {
     private token: string;
     private timeout: number;
     private insecure: boolean;
+    private v1Client?: ZentaoV1Client;
 
     /**
      * @param serverUrl 禅道站点根地址，如 `https://zentao.example.com`（末尾 `/` 会被去掉）
      * @param token API Token（请求头 `Token`）
      * @param options 客户端级选项
      */
-    constructor(serverUrl: string, token: string, options?: ClientOptions) {
+    constructor(serverUrl: string, token: string, options?: ClientOptions & { apiVersion?: 'v1' | 'v2'; sessionId?: string; serverConfig?: ServerConfig }) {
         const url = serverUrl.replace(/\/+$/, '');
+        if (options?.apiVersion === 'v1') {
+            if (options.sessionId) {
+                this.v1Client = new ZentaoV1Client(serverUrl, options.sessionId, options);
+                this.baseUrl = this.v1Client.baseUrl;
+                this.token = '';
+            } else {
+                this.baseUrl = `${url}/api.php/v1`;
+                this.token = token;
+            }
+            this.timeout = options?.timeout ?? 10000;
+            this.insecure = options?.insecure ?? false;
+            return;
+        }
         this.baseUrl = `${url}/api.php/v2`;
         this.token = token;
         this.timeout = options?.timeout ?? 10000;
@@ -42,6 +57,9 @@ export class ZentaoClient {
         path: string,
         options?: RequestOptions,
     ): Promise<T> {
+        if (this.v1Client) {
+            return this.v1Client.request<T>(method, path, options);
+        }
         let url = `${this.baseUrl}${path}`;
         if (options?.query) {
             const search = new URLSearchParams();
@@ -154,12 +172,19 @@ export class ZentaoClient {
 
     /** 在同一线程/进程内复用客户端实例时，用于刷新 Token */
     setToken(token: string): void {
+        if (this.v1Client) {
+            this.v1Client.setSessionId(token);
+            return;
+        }
         this.token = token;
     }
 
     /** 获取禅道服务端配置 */
     async getServerConfig(): Promise<ServerConfig> {
-        const url = `${this.baseUrl.replace('/api.php/v2', '')}/?mode=getconfig`;
+        if (this.v1Client) {
+            return this.v1Client.getServerConfig();
+        }
+        const url = `${this.baseUrl.replace(/\/api\.php\/v[12]/, '')}/?mode=getconfig`;
         const response = await fetch(url, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }
