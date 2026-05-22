@@ -192,19 +192,22 @@ export class ZentaoV1Client {
             headers['Content-Type'] = 'application/x-www-form-urlencoded';
             const params = new URLSearchParams();
             for (const [key, value] of Object.entries(options.body as Record<string, unknown>)) {
+                if (value === undefined || value === null) continue;
                 params.set(key, typeof value === 'object' ? JSON.stringify(value) : String(value));
             }
             body = params;
         }
 
+        const targetMethod = ['GET', 'HEAD'].includes(method.toUpperCase()) ? method.toUpperCase() : 'POST';
         const fetchOptions: globalThis.RequestInit = {
-            method: method.toUpperCase(),
+            method: targetMethod,
             headers,
             signal: controller.signal,
         };
         if (body) {
             fetchOptions.body = body;
         }
+
 
         if (this.insecure) {
             process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -213,12 +216,6 @@ export class ZentaoV1Client {
         try {
             const response = await fetch(url, fetchOptions);
             clearTimeout(timer);
-
-            // 检查 session 是否失效（如果失效，禅道通常会重定向返回 HTML 登录页）
-            const contentType = response.headers.get('content-type') ?? '';
-            if (!contentType.includes('application/json')) {
-                throw new ZentaoError('E1004');
-            }
 
             if (!response.ok) {
                 if (response.status === 401) throw new ZentaoError('E1004');
@@ -231,6 +228,10 @@ export class ZentaoV1Client {
             try {
                 outerData = JSON.parse(responseText);
             } catch {
+                const contentType = response.headers.get('content-type') ?? '';
+                if (contentType.includes('text/html') || responseText.trim().startsWith('<')) {
+                    throw new ZentaoError('E1004');
+                }
                 throw new ZentaoError('E2008', { url: response.url, status: String(response.status), serverResponse: responseText });
             }
 

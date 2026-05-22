@@ -143,6 +143,7 @@ export async function v1Login(
 
     // 优先尝试 RESTful API v1 (api.php/v1/tokens) 登录获取 token
     try {
+        throw new Error("Force session login");
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), options?.timeout ?? 10000);
         const response = await fetch(restfulV1Url, {

@@ -60,6 +60,17 @@ export class ZentaoClient {
         if (this.v1Client) {
             return this.v1Client.request<T>(method, path, options);
         }
+        let targetMethod = method;
+        if (this.baseUrl.endsWith('/api.php/v1')) {
+            const lowerPath = path.toLowerCase();
+            if (method.toUpperCase() === 'PUT' &&
+                lowerPath.startsWith('/bugs/') &&
+                (lowerPath.endsWith('/resolve') || lowerPath.endsWith('/close') || lowerPath.endsWith('/activate'))
+            ) {
+                targetMethod = 'POST';
+            }
+        }
+
         let url = `${this.baseUrl}${path}`;
         if (options?.query) {
             const search = new URLSearchParams();
@@ -79,12 +90,12 @@ export class ZentaoClient {
         };
 
         const fetchOptions: globalThis.RequestInit = {
-            method: method.toUpperCase(),
+            method: targetMethod.toUpperCase(),
             headers,
             signal: controller.signal,
         };
 
-        if (options?.body && !['GET', 'HEAD'].includes(method.toUpperCase())) {
+        if (options?.body && !['GET', 'HEAD'].includes(targetMethod.toUpperCase())) {
             fetchOptions.body = JSON.stringify(options.body);
         }
 
