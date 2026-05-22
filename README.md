@@ -29,7 +29,7 @@
 
 ```bash
 # 全局安装 zentao-cli 工具
-npm install -g https://github.com/huanggz0828/zentao-cli/releases/download/v0.1.6-v1.1/zentao-cli-0.1.6-v1.1.tgz
+npm install -g https://github.com/huanggz0828/zentao-cli/releases/latest/download/zentao-cli-latest.tgz
 
 # 其他运行方式（npx 免安装运行，若未全局安装）
 # npx zentao-cli
@@ -168,7 +168,7 @@ $ zentao add-skill claude-code
 
 ```bash
 # 一键安装、登录和配置 Skill
-$ npm install -g https://github.com/huanggz0828/zentao-cli/releases/download/v0.1.6-v1.1/zentao-cli-0.1.6-v1.1.tgz && zentao login && zentao add-skill all
+$ npm install -g https://github.com/huanggz0828/zentao-cli/releases/latest/download/zentao-cli-latest.tgz && zentao login && zentao add-skill all
 ```
 
 安装技能后即可在对应 Agent 工具中使用禅道 CLI 技能。
@@ -212,7 +212,7 @@ $ zentao add-mcp
 
 ```bash
 # 一键安装、登录和配置 MCP 服务
-$ npm install -g https://github.com/huanggz0828/zentao-cli/releases/download/v0.1.6-v1.1/zentao-cli-0.1.6-v1.1.tgz && zentao login && zentao add-mcp
+$ npm install -g https://github.com/huanggz0828/zentao-cli/releases/latest/download/zentao-cli-latest.tgz && zentao login && zentao add-mcp
 ```
 
 统一支持通过 `npx -y zentao-cli mcp` 手动启动 MCP 服务，然后通过 MCP 客户端访问和操作禅道数据。目前各大 Agents 工具无需提前安装 zentao-cli 本身，只需要在 MCP 服务配置中增加如下配置即可：

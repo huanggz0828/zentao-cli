@@ -32,7 +32,9 @@ jobs:
         run: bun run build
 
       - name: Pack Tarball
-        run: npm pack
+        run: |
+          npm pack
+          cp zentao-cli-*.tgz zentao-cli-latest.tgz
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
