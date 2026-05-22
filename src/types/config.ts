@@ -42,7 +42,7 @@ export interface UserConfig {
     silent?: boolean;
     /** JSON 输出是否美化（带缩进） */
     jsonPretty?: boolean;
-    /** API 接口版本，'v1' | 'v2'，默认为 'v2' */
+    /** API 接口版本，'v1' | 'v2'，默认为 'v1' */
     apiVersion?: 'v1' | 'v2';
 }
 

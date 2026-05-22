@@ -29,18 +29,13 @@
 
 ```bash
 # 全局安装 zentao-cli 工具
-npm install -g zentao-cli
+npm install -g https://github.com/huanggz0828/zentao-cli/releases/download/v0.1.6-v1.1/zentao-cli-0.1.6-v1.1.tgz
 
-# 其他安装与运行方式
-# bun install -g zentao-cli  # ← 使用 bun 安装
-# npx zentao-cli             # ← 通过 npx 免安装运行
-# pnpm dlx zentao-cli        # ← 通过 pnpm 免安装运行
-
-# 从 GitHub Release 安装指定编译好的版本（适用于没有公开 npm 镜像且无本地编译环境）
-# npm install -g https://github.com/huanggz0828/zentao-cli/releases/download/v<version>/zentao-cli-<version>.tgz
+# 其他运行方式（npx 免安装运行，若未全局安装）
+# npx zentao-cli
 
 # 首次使用需要进行登录
-zentao login -s https://zentao.example.com -u admin -p 123456
+zentao login -s http://192.168.208.11:8080/ -u admin -p 123456
 
 # 直接执行获取可用命令帮助
 zentao
@@ -173,7 +168,7 @@ $ zentao add-skill claude-code
 
 ```bash
 # 一键安装、登录和配置 Skill
-$ pnpm install -g zentao-cli && zentao login && zentao add-skill all
+$ npm install -g https://github.com/huanggz0828/zentao-cli/releases/download/v0.1.6-v1.1/zentao-cli-0.1.6-v1.1.tgz && zentao login && zentao add-skill all
 ```
 
 安装技能后即可在对应 Agent 工具中使用禅道 CLI 技能。
@@ -194,7 +189,7 @@ Zentao CLI 支持一键配置 MCP 服务，只需要执行 `zentao add-mcp` 命�
 # 一键配置 MCP 服务
 $ zentao add-mcp
 
-请输入禅道 URL: https://zentao.example.com
+请输入禅道 URL: http://192.168.208.11:8080/
 请输入用户名: admin
 请输入密码: 123456
 
@@ -217,7 +212,7 @@ $ zentao add-mcp
 
 ```bash
 # 一键安装、登录和配置 MCP 服务
-$ pnpm install -g zentao-cli && zentao login && zentao add-mcp
+$ npm install -g https://github.com/huanggz0828/zentao-cli/releases/download/v0.1.6-v1.1/zentao-cli-0.1.6-v1.1.tgz && zentao login && zentao add-mcp
 ```
 
 统一支持通过 `npx -y zentao-cli mcp` 手动启动 MCP 服务，然后通过 MCP 客户端访问和操作禅道数据。目前各大 Agents 工具无需提前安装 zentao-cli 本身，只需要在 MCP 服务配置中增加如下配置即可：
@@ -229,7 +224,7 @@ $ pnpm install -g zentao-cli && zentao login && zentao add-mcp
       "command": "npx",
       "args": ["-y", "zentao-cli", "mcp"],
       "env": {
-        "ZENTAO_URL": "https://zentao.example.com",
+        "ZENTAO_URL": "http://192.168.208.11:8080/",
         "ZENTAO_ACCOUNT": "admin",
         "ZENTAO_PASSWORD": "123456"
       }

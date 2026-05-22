@@ -30,7 +30,7 @@ export async function login(
     password: string,
     options?: { insecure?: boolean; timeout?: number; apiVersion?: 'v1' | 'v2' },
 ): Promise<LoginResult> {
-    if (options?.apiVersion === 'v1') {
+    if (options?.apiVersion !== 'v2') {
         const v1Result = await v1Login(serverUrl, account, password, options);
         const tokenVal = v1Result.token ?? v1Result.sessionId ?? '';
         const client = new ZentaoClient(serverUrl, tokenVal, {
@@ -105,7 +105,7 @@ export async function login(
             // Token valid but couldn't fetch user details - not fatal
         }
 
-        return { token: data.token, user, serverConfig };
+        return { token: data.token, user, serverConfig, apiVersion: 'v2' };
     } catch (error) {
         clearTimeout(timer);
         if (error instanceof ZentaoError) throw error;

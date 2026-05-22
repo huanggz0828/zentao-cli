@@ -16,7 +16,8 @@ export function registerLoginCommand(program: Command): void {
         .option('-p, --password <password>', '密码')
         .option('-t, --token <token>', 'Token')
         .option('--useEnv', '强制使用环境变量登录')
-        .option('--v1', '使用 v1 API 协议登录（适用于旧版禅道）')
+        .option('--v1', '使用 v1 API 协议登录（默认）')
+        .option('--v2', '使用 v2 API 协议登录')
         .action(async (opts) => {
             const globalOpts = program.opts() as GlobalOptions;
             try {
@@ -53,16 +54,17 @@ export function registerLoginCommand(program: Command): void {
 
                 const oldProfile = getProfile(account, server);
                 let profile: Profile;
+                const apiVersion = opts.v2 ? 'v2' : 'v1';
                 if (token) {
                     profile = buildProfile(server, account, token, undefined, undefined, oldProfile, {
-                        apiVersion: opts.v1 ? 'v1' : undefined,
-                        sessionId: opts.v1 ? token : undefined,
+                        apiVersion: apiVersion,
+                        sessionId: apiVersion === 'v1' ? token : undefined,
                     });
                 } else {
                     const result = await login(server, account, password, {
                         insecure: globalOpts.insecure,
                         timeout: globalOpts.timeout,
-                        apiVersion: opts.v1 ? 'v1' : undefined,
+                        apiVersion: apiVersion,
                     });
 
                     profile = buildProfile(server, account, result.token, result.serverConfig, result.user, oldProfile, {

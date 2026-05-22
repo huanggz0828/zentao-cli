@@ -28,8 +28,8 @@ export class ZentaoClient {
      */
     constructor(serverUrl: string, token: string, options?: ClientOptions & { apiVersion?: 'v1' | 'v2'; sessionId?: string; serverConfig?: ServerConfig }) {
         const url = serverUrl.replace(/\/+$/, '');
-        if (options?.apiVersion === 'v1') {
-            if (options.sessionId) {
+        if (options?.apiVersion !== 'v2') {
+            if (options?.sessionId) {
                 this.v1Client = new ZentaoV1Client(serverUrl, options.sessionId, options);
                 this.baseUrl = this.v1Client.baseUrl;
                 this.token = '';

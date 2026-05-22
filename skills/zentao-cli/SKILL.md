@@ -6,7 +6,7 @@ metadata:
   author: Sun Hao <sunhao@chandao.com>
   repository: https://github.com/easysoft/zentao-cli.git
   keywords: [zentao, 禅道, cli, project-management]
-  version: 0.1.6
+  version: 0.1.6-v1.1
 ---
 
 # 禅道 CLI
@@ -26,12 +26,18 @@ npm install -g zentao-cli
 
 如果用户没有安装，引导用户进行全局安装使用，如果系统存在 bun 或 pnpm 则优先使用 bun 或 pnpm 进行全局安装。
 
-### 认证
+### 认证与兼容性
+
+本工具已深度二次开发以全面兼容 **禅道 v1.0 API** 协议。对于未开启 v2 RESTful 接口的旧版禅道服务器，提供两级降级登录探测机制与动态路由翻译。
 
 首次执行任意 `zentao` 命令会自动提示登录。也可显式登录：
 
 ```bash
+# 默认使用 v1 协议登录
 zentao login -s https://zentao.example.com -u admin -p 123456
+
+# 如需强制使用 v2 协议登录，可以添加 --v2 参数
+zentao login -s https://zentao.example.com -u admin -p 123456 --v2
 ```
 
 环境变量（优先级低于命令行参数）：
@@ -43,7 +49,7 @@ zentao login -s https://zentao.example.com -u admin -p 123456
 | `ZENTAO_PASSWORD` | 密码 |
 | `ZENTAO_TOKEN` | 直接指定 Token（有此变量可省略密码） |
 
-登录成功后凭证缓存在 `~/.config/zentao/zentao.json`，后续无需重复登录。
+登录成功后凭证与 API 版本配置缓存在 `~/.config/zentao/zentao.json`，后续无需重复登录。
 
 ### 凭证安全
 
@@ -128,17 +134,28 @@ zentao bug delete 1 --yes
 
 ### 不知道 ID 时
 
-先查列表获取 ID，再操作具体对象：
+先查列表获取 ID，再操作具体对象（可使用 `--browseType` 参数来筛选特定类型的 Bug 等）：
 
 ```bash
 zentao product --pick=id,name           # 查看产品列表
-zentao bug --product=1 --pick=id,title  # 查看 Bug 列表
+zentao bug --product=1 --browseType=assignedtome --pick=id,title  # 查看指派给我的 Bug 列表
 zentao bug 42                           # 查看具体 Bug
 ```
 
 ### 写操作前确认
 
 执行创建、更新、删除等写操作前，先向用户确认操作内容。用户明确要求不确认时可跳过。
+
+### AI 友好型富文本图片自动重写
+
+导出的 Markdown 文档（如富文本字段中的图片）在禅道中会被保存为服务器端的内部大括号占位符（例如 `![]({3329.png})`）。为了让 AI 在阅读或修改代码时能直接看到图片内容，可以使用本项目提供的图片下载重写工具：
+
+```bash
+# 将 bugs.md 中的大括号图片占位符自动下载并重写为本地相对路径 images/3329.png
+npx tsx scripts/download-images.ts bugs.md
+```
+
+该脚本会自动解析指定的 Markdown 文档，提取其中的图片 ID，并根据当前登录的凭证和 SessionID 自动将图片下载到同级目录的 `images/` 下，最后在 Markdown 中替换为本地相对路径链接。
 
 ## 数据处理
 
@@ -152,11 +169,12 @@ zentao product --pick=id,name,status
 
 ```bash
 zentao bug --product=1 --filter='status:active'
+zentao bug --product=1 --filter='status=active'         # 支持 = 号，更加直观
 zentao bug --product=1 --filter='severity<=2,pri<=2'    # AND
 zentao bug --product=1 --filter='status:active' --filter='status:resolved'  # OR
 ```
 
-支持的运算符：`:` 等于、`!=` 不等于、`>` `<` `>=` `<=`、`~` 包含、`!~` 不包含。
+支持的运算符：`:` 和 `=` 等于、`!=` 不等于、`>` `<` `>=` `<=`、`~` 包含、`!~` 不包含。
 
 ### 模糊搜索
 
@@ -256,8 +274,14 @@ zentao help              # 查看所有命令
 | E2006 | 无权限 | 提示用户检查权限 |
 | E5001 | 请求超时 | 检查网络或禅道服务状态 |
 
-## 注意事项
+## 注意事项与进阶功能
 
 - 不确定模块参数时，先执行 `zentao <module> help` 查看帮助，不确定操作参数时，先执行 `zentao <module> <action> help` 查看帮助
-- `browseType` 常用值：`all`（全部）、`doing`（进行中）、`closed`（已关闭）
+- **客户端过滤机制 (`browseType`)**：在 v1 协议模式下，工具会在客户端兜底过滤 Bug 列表，实现对常用浏览类型的模拟。支持如下过滤选项：
+  - `all`（全部）
+  - `doing`（进行中）
+  - `closed`（已关闭）
+  - `assignedtome`（指派给我）
+  - `unclosed`（未关闭）
+  - `openedbyme`（我开启的）
 - 多账号切换：`zentao profile` 查看和切换账号

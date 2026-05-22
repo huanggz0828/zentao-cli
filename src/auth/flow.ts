@@ -45,7 +45,7 @@ export async function ensureAuth(options?: { insecure?: boolean; timeout?: numbe
             const envApiVersion = (process.env.ZENTAO_API_VERSION === 'v1' || process.env.ZENTAO_API_VERSION === 'v2')
                 ? process.env.ZENTAO_API_VERSION
                 : undefined;
-            const apiVersion = envApiVersion ?? existingProfile?.config?.apiVersion;
+            const apiVersion = envApiVersion ?? existingProfile?.config?.apiVersion ?? 'v1';
             const sessionId = apiVersion === 'v1' ? env.token : undefined;
 
             const clientOpts = {
@@ -71,7 +71,7 @@ export async function ensureAuth(options?: { insecure?: boolean; timeout?: numbe
             const envApiVersion = (process.env.ZENTAO_API_VERSION === 'v1' || process.env.ZENTAO_API_VERSION === 'v2')
                 ? process.env.ZENTAO_API_VERSION
                 : undefined;
-            const apiVersion = envApiVersion ?? existingProfile?.config?.apiVersion;
+            const apiVersion = envApiVersion ?? existingProfile?.config?.apiVersion ?? 'v1';
 
             const clientOpts = {
                 insecure: options?.insecure,
