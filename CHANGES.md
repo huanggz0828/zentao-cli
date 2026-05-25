@@ -1,5 +1,13 @@
 # Changes
 
+## 0.1.6-v1.4
+
+### 🐛 修复与优化 (Fix & Refactor)
+
+- **产品列表获取兼容**: 修复了在 v1 API 协议下执行 `zentao product` 报错 `$.map is not a function` 的问题。当 v1 接口返回的 `products` 数据结构为对象时，自动将其转换为包含 id 与 name 属性的数组，以兼容后续渲染和过滤流程。并为列表获取逻辑添加了数组类型的强校验与回落机制，避免崩溃。
+- **命令解析错误修复**: 修复了执行不带参数的模块命令时（如 `zentao user`），由于可选链上调用 `.map` 导致抛出 `Cannot read properties of undefined (reading 'map')` 的问题。
+- **技能参数优化**: 优化了 `skills/zentao-bug-fixing/SKILL.md` 指导，新增关于 `zentao bug` 命令中产品/项目/执行（Scope 参数）为必填项的警告提示，避免报错 `E2003`。
+
 ## 0.1.6
 
 ### 🤸 技能更新（Skill）
