@@ -262,6 +262,19 @@ export class ZentaoV1Client {
                     if ('recPerPage' in pagerObj) innerData.recPerPage = Number(pagerObj.recPerPage);
                     if ('pageID' in pagerObj) innerData.pageID = Number(pagerObj.pageID);
                 }
+
+                // 兼容：当 products, projects 等对象数据在 v1 中返回不是数组而是以 ID 为键的对象时，将其转化为包含 id 和 name 的数组形式
+                const arrayCompatibleKeys = ['products', 'projects', 'executions', 'programs', 'users', 'tasks', 'stories'];
+                for (const key of arrayCompatibleKeys) {
+                    if (innerData[key] && typeof innerData[key] === 'object' && !Array.isArray(innerData[key])) {
+                        innerData[key] = Object.entries(innerData[key]).map(([id, val]) => {
+                            if (val && typeof val === 'object') {
+                                return { id: Number(id) || id, ...val };
+                            }
+                            return { id: Number(id) || id, name: val };
+                        });
+                    }
+                }
             }
 
             return innerData as T;

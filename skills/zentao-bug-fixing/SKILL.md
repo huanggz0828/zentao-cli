@@ -13,9 +13,54 @@ metadata:
 
 本技能用于指导 AI 代理或开发人员如何高效、准确地处理禅道（ZenTao）中的 Bug。包含从 Bug 认领与查看、富文本图片的拼接访问与下载分析，到 Bug 的状态流转与解决的完整规范流程。
 
-## 1. 查看、指派与认领 Bug
+## 1. 认证与登录
+
+本工具已深度兼容 **禅道 v1.0 API** 协议。对于未开启 v2 RESTful 接口的旧版禅道服务器，提供两级降级登录探测机制与动态路由翻译。
+
+首次执行任意 `zentao` 命令会自动提示登录。也可显式登录：
+
+```bash
+# 默认使用 v1 协议登录
+zentao login -s https://zentao.example.com -u admin -p 123456
+
+# 如需强制使用 v2 协议登录，可以添加 --v2 参数
+zentao login -s https://zentao.example.com -u admin -p 123456 --v2
+```
+
+环境变量（优先级低于命令行参数）：
+
+| 变量 | 说明 |
+|------|------|
+| `ZENTAO_URL` | 禅道服务地址 |
+| `ZENTAO_ACCOUNT` | 用户账号 |
+| `ZENTAO_PASSWORD` | 密码 |
+| `ZENTAO_TOKEN` | 直接指定 Token（有此变量可省略密码） |
+
+登录成功后凭证与 API 版本配置缓存在 `~/.config/zentao/zentao.json`，后续无需重复登录。
+
+---
+
+## 2. 获取产品列表
+
+在获取 Bug 列表前，如果不知道产品 ID，需要先获取产品列表：
+
+```bash
+# 获取产品列表，从中找到对应产品的 ID
+zentao product
+```
+
+---
+
+## 3. 查看、指派与认领 Bug
 
 在处理 Bug 之前，首先需要获取指派给当前账号且处于激活（`active`）状态的 Bug 列表。
+
+> [!NOTE]
+> **列表范围参数**：
+> 获取 Bug 列表时必须指定所属的范围，支持以下三种限定方式之一：
+> * `--product=<产品ID>`：获取指定产品下的 Bug（推荐，例如：`zentao bug --product=1`）
+> * `--project=<项目ID>`：获取指定项目下的 Bug
+> * `--execution=<执行ID>`：获取指定执行/迭代下的 Bug
 
 ```bash
 # 查看指派给我的活跃 Bug 列表
@@ -29,9 +74,12 @@ zentao bug --product=<产品ID> --filter='assignedTo:<当前账号>,status:activ
 zentao bug <id>
 ```
 
-在排查后，如果发现此 Bug 不属于当前账号的工作范围，或者需要转交他人（例如需要另一个开发、测试或项目经理协同），可以执行指派操作：
+在排查后，如果发现此 Bug 不属于当前账号的工作范围，或者需要转交他人（例如需要另一个开发、测试或项目经理协同），可以先查询用户列表，再执行指派操作：
 
 ```bash
+# 查询系统中的用户账号列表，以找到要指派的人的账号
+zentao user --pick=account,realname
+
 # 将 Bug 指派给其他人（例如指派给账号 testuser）
 zentao bug update <id> --assignedTo=testuser
 ```
@@ -45,7 +93,7 @@ zentao bug update <id> --assignedTo=<当前账号>
 
 ---
 
-## 2. 富文本图片获取与分析规范（强制性要求）
+## 4. 富文本图片获取与分析规范（强制性要求）
 
 在禅道的数据（例如 Bug 描述、步骤、需求描述等）中，可能包含图片链接，通常形式为 `![](/file-read-3334.png)` 或 `![]({3334.png})` 等。图片中往往包含关键的报错信息、异常 UI 表现、控制台日志或特定重现步骤截图。
 
@@ -68,7 +116,7 @@ zentao bug update <id> --assignedTo=<当前账号>
 
 ---
 
-## 3. 解决与流转 Bug
+## 5. 解决与流转 Bug
 
 在定位到 Bug 的根源并完成代码修改后，需要通过 `resolve` 操作来将 Bug 推送至“已解决”状态：
 
@@ -89,7 +137,7 @@ zentao bug resolve <id> --resolution=fixed
 | `postponed` | 延期处理 | 暂时不影响核心流程，计划延期至后续迭代解决 |
 | `willnotfix` | 不予解决 | 经沟通，此 Bug 不需要或不值得被修复 |
 
-### 4. 流程与回顾
+### 6. 流程与回顾
 
 完成 Bug 解决动作后，该 Bug 会流转至解决状态（`resolved`），后续将由测试人员确认是否关闭（`closed`）或重新激活（`active`）。
 

@@ -118,7 +118,7 @@ export function registerModuleCommands(program: Command): void {
                 }
 
                 let action = firstArg;
-                const ids = firstArg?.split(',').map((s) => +s.trim());
+                const ids = firstArg ? firstArg.split(',').map((s) => +s.trim()) : undefined;
                 if (ids?.length && ids.every((id) => !isNaN(id))) {
                     options.id = ids.join(',');
                     action = 'get';
