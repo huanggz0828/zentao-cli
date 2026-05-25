@@ -6,7 +6,7 @@ metadata:
   author: Sun Hao <sunhao@chandao.com>
   repository: https://github.com/easysoft/zentao-cli.git
   keywords: [zentao, 禅道, cli, project-management]
-  version: 0.1.6-v1.3
+  version: 0.1.6-v1.4
 ---
 
 # 禅道 CLI
@@ -153,6 +153,30 @@ zentao bug 42                           # 查看具体 Bug
 ```bash
 zentao product --pick=id,name,status
 ```
+
+### 富文本图片获取与分析（强制性要求）
+
+在禅道的数据（例如 Bug 描述、步骤、需求描述等）中，可能包含图片链接，通常形式为 `![](/file-read-3334.png)` 或 `![]({3334.png})` 等。图片中往往包含关键的报错信息、异常 UI 表现、控制台日志或特定重现步骤截图。
+
+为了确保 Bug 修复的准确性，在排查和修复过程中必须遵循以下规范：
+
+#### 严禁仅看文字描述
+在排查、修改和修复 Bug 的过程中，AI **绝对不能只查看 Bug 的文字描述**，极易漏掉核心线索或产生误判。
+
+#### 必须分析图片
+如果 Bug 描述、复现步骤或附件中包含任何图片链接，AI **必须主动获取该图片并对图片内容进行深度分析**。
+
+#### 图片地址拼接与下载方法
+- 禅道中的图片可以直接通过拼接禅道服务地址 `ZENTAO_URL` 加上图片相对路径来访问或下载。
+- 比如图片 `![](/file-read-3334.png)` 或 `![]({3334.png})`，若配置的禅道服务地址 `ZENTAO_URL` 为 `http://192.168.208.11:8080`，则该图片的完整访问或下载链接为 `http://192.168.208.11:8080/file-read-3334.png`（其中 `{3334.png}` 大括号格式也可翻译为 `/file-read-3334.png`）。
+- 若 AI 需要下载图片到本地以进行查看和分析，可以使用 `curl` 等命令行工具直接下载，例如：
+  ```bash
+  curl -o local_image.png http://192.168.208.11:8080/file-read-3334.png
+  ```
+  下载完成后，使用 `view_file` 工具查看并分析下载的图片。
+
+---
+
 
 ### 过滤
 
