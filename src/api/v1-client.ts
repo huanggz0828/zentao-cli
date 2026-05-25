@@ -24,6 +24,15 @@ export function translateV2PathToV1(method: string, path: string): V1ActionConfi
         tasks: 'task',
         stories: 'story',
         programs: 'program',
+        requirements: 'requirement',
+        productplans: 'productplan',
+        testcases: 'testcase',
+        epics: 'epic',
+        releases: 'release',
+        builds: 'build',
+        testtasks: 'testtask',
+        feedbacks: 'feedback',
+        tickets: 'ticket',
     };
 
     const firstPart = parts[0] || '';
@@ -38,6 +47,15 @@ export function translateV2PathToV1(method: string, path: string): V1ActionConfi
         user: { list: 'getUserList', get: 'view', create: 'create', update: 'edit' },
         execution: { list: 'browse', get: 'view', create: 'create', update: 'edit' },
         program: { list: 'browse', get: 'view', create: 'create', update: 'edit' },
+        requirement: { list: 'browse', get: 'view', create: 'create', update: 'edit' },
+        productplan: { list: 'browse', get: 'view', create: 'create', update: 'edit' },
+        testcase: { list: 'browse', get: 'view', create: 'create', update: 'edit' },
+        epic: { list: 'browse', get: 'view', create: 'create', update: 'edit' },
+        release: { list: 'browse', get: 'view', create: 'create', update: 'edit' },
+        build: { list: 'browse', get: 'view', create: 'create', update: 'edit' },
+        testtask: { list: 'browse', get: 'view', create: 'create', update: 'edit' },
+        feedback: { list: 'browse', get: 'view', create: 'create', update: 'edit' },
+        ticket: { list: 'browse', get: 'view', create: 'create', update: 'edit' },
     };
 
     const getAction = (act: string) => {
@@ -75,18 +93,6 @@ export function translateV2PathToV1(method: string, path: string): V1ActionConfi
         }
     }
 
-    // 格式 3: /bugs/{id}/resolve 或者是 /bugs/123/resolve
-    if (parts.length === 3) {
-        const idPart = parts[1];
-        const isId = /^\d+$/.test(idPart) || (idPart.startsWith('{') && idPart.endsWith('}'));
-        const id = /^\d+$/.test(idPart) ? Number(idPart) : undefined;
-        const lastPart = parts[2];
-
-        if (isId) {
-            return { module, action: getAction(lastPart), id };
-        }
-    }
-
     // 格式 4: /products/{productID}/bugs 这种关联查询
     if (parts.length === 3 && pluralToSingular[parts[2]]) {
         const idPart = parts[1];
@@ -97,8 +103,21 @@ export function translateV2PathToV1(method: string, path: string): V1ActionConfi
         return {
             module: subModule,
             action: v1ActionMap[subModule]?.list ?? 'browse',
+            id: assocId,
             assocParams: assocId ? { [assocKey]: assocId } : undefined
         };
+    }
+
+    // 格式 3: /bugs/{id}/resolve 或者是 /bugs/123/resolve
+    if (parts.length === 3) {
+        const idPart = parts[1];
+        const isId = /^\d+$/.test(idPart) || (idPart.startsWith('{') && idPart.endsWith('}'));
+        const id = /^\d+$/.test(idPart) ? Number(idPart) : undefined;
+        const lastPart = parts[2];
+
+        if (isId) {
+            return { module, action: getAction(lastPart), id };
+        }
     }
 
     // 回退默认值

@@ -21,7 +21,6 @@ metadata:
 npm install -g zentao-cli
 # 或 bun install -g zentao-cli
 # 或 pnpm install -g zentao-cli
-# 或免安装运行：npx zentao-cli
 ```
 
 如果用户没有安装，引导用户进行全局安装使用，如果系统存在 bun 或 pnpm 则优先使用 bun 或 pnpm 进行全局安装。
@@ -35,9 +34,6 @@ npm install -g zentao-cli
 ```bash
 # 默认使用 v1 协议登录
 zentao login -s https://zentao.example.com -u admin -p 123456
-
-# 如需强制使用 v2 协议登录，可以添加 --v2 参数
-zentao login -s https://zentao.example.com -u admin -p 123456 --v2
 ```
 
 环境变量（优先级低于命令行参数）：
