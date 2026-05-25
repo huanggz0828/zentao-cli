@@ -23,11 +23,11 @@
 * **官方原版**：`--filter` 筛选表达式只支持 `:` 运算符（例如 `--filter status:active`）。
 * **二次开发**：在 [data.ts](file:///c:/ICTNJ/zentao-cli-workspace/zentao-cli/src/utils/data.ts) 中扩展了 `=` 关系运算符（支持如 `--filter status=active`），提供更加符合日常使用直觉的语法规则。
 
-### 1.4 AI 友好型图片占位符自动转换工具
-* **官方原版**：导出的 Markdown 文件中，禅道的富文本图片均呈现为服务器端的内部大括号占位符（如 `![]({3329.png})`），发送给外部 AI 修改代码时，AI 无法看到图片内容。
-* **二次开发**：
-  * 新增了自动化脚本 [download-images.ts](file:///c:/ICTNJ/zentao-cli-workspace/zentao-cli/scripts/download-images.ts)。
-  * 该工具会自动解析导出的 Markdown 文档，提取所有图片占位符 ID，并根据当前登录的凭证从禅道服务器把图片下载保存到本地的 `images/` 目录下，随后将 Markdown 占位符自动重写替换为本地相对路径链接（如 `![](images/3329.png)`），方便连同图片打包发给 AI。
+### 1.4 富文本图片直接访问与分析规范
+* **官方原版**：导出的 Markdown 文件中，禅道的富文本图片均呈现为服务器端的内部大括号占位符（如 `![]({3329.png})`）或相对路径（如 `![](/file-read-3334.png)`）。
+* **二次开发及调整**：
+  * **删除冗余的下载脚本**：经测试，禅道中的富文本图片如 `![](/file-read-3334.png)` 或 `![]({3334.png})`，均可直接通过拼接禅道服务地址 `ZENTAO_URL` 组成完整 URL（如 `http://192.168.208.11:8080/file-read-3334.png`）直接访问或下载。因此废弃并删除了此前新增的冗余本地图片下载脚本 `download-images.ts` 和 `test-download.ts`。
+  * **强化图片分析规范**：在新创的 Bug 修复指导技能 [zentao-bug-fixing/SKILL.md](file:///c:/ICTNJ/zentao-cli-workspace/zentao-cli/skills/zentao-bug-fixing/SKILL.md) 中明确规定，AI 在排查和修复 Bug 的过程中，**绝对不能仅看 Bug 的文字描述，必须主动分析其中包含的图片**，通过拼接得到的 URL 获取并分析图片内容（如报错截图、日志等），以保证 Bug 修复的准确性。
 
 ---
 
@@ -49,5 +49,6 @@
 | [src/types/commands.ts](file:///c:/ICTNJ/zentao-cli-workspace/zentao-cli/src/types/commands.ts) | 修改 | `ModuleActionOptions` 接口增加可选的 `browseType` 字段定义。 |
 | [src/types/config.ts](file:///c:/ICTNJ/zentao-cli-workspace/zentao-cli/src/types/config.ts) | 修改 | `Profile` 接口增加 `sessionId`，`UserConfig` 接口增加 `apiVersion` 属性类型定义。 |
 | [src/utils/data.ts](file:///c:/ICTNJ/zentao-cli-workspace/zentao-cli/src/utils/data.ts) | 修改 | 扩展内置筛选器支持 `=` 操作符，增强过滤条件的通用性。 |
-| [scripts/download-images.ts](file:///c:/ICTNJ/zentao-cli-workspace/zentao-cli/scripts/download-images.ts) | **新增** | 新增批量图片下载与 Markdown 链接相对化重写维护脚本。 |
-| [scripts/test-download.ts](file:///c:/ICTNJ/zentao-cli-workspace/zentao-cli/scripts/test-download.ts) | **新增** | 新增探测工具，用于测试服务器上所有可用的大括号附件/图片下载地址兼容性。 |
+| [scripts/download-images.ts](file:///c:/ICTNJ/zentao-cli-workspace/zentao-cli/scripts/download-images.ts) | **删除** | （已废弃并删除）原批量图片下载与 Markdown 链接相对化重写脚本，改为直接通过 URL 访问。 |
+| [scripts/test-download.ts](file:///c:/ICTNJ/zentao-cli-workspace/zentao-cli/scripts/test-download.ts) | **删除** | （已废弃并删除）原大括号附件/图片下载地址兼容性测试探测脚本。 |
+| [skills/zentao-bug-fixing/SKILL.md](file:///c:/ICTNJ/zentao-cli-workspace/zentao-cli/skills/zentao-bug-fixing/SKILL.md) | **新增** | 新增禅道 Bug 排查与修复指导技能，包含富文本图片强制分析与解决 Bug 流程。 |
