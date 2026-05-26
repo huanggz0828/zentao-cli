@@ -4,27 +4,27 @@ import { ZentaoError } from '../src/errors';
 
 describe('ZentaoClient', () => {
     test('constructs correct base URL', () => {
-        const client = new ZentaoClient('https://zentao.example.com', 'token123');
+        const client = new ZentaoClient('https://zentao.example.com', 'token123', { apiVersion: 'v2' });
         expect(client.baseUrl).toBe('https://zentao.example.com/api.php/v2');
     });
 
     test('trims trailing slashes from server URL', () => {
-        const client = new ZentaoClient('https://zentao.example.com/', 'token123');
+        const client = new ZentaoClient('https://zentao.example.com/', 'token123', { apiVersion: 'v2' });
         expect(client.baseUrl).toBe('https://zentao.example.com/api.php/v2');
     });
 
     test('trims multiple trailing slashes', () => {
-        const client = new ZentaoClient('https://zentao.example.com///', 'token123');
+        const client = new ZentaoClient('https://zentao.example.com///', 'token123', { apiVersion: 'v2' });
         expect(client.baseUrl).toBe('https://zentao.example.com/api.php/v2');
     });
 
     test('preserves port in server URL', () => {
-        const client = new ZentaoClient('https://zentao.example.com:8080', 'token123');
+        const client = new ZentaoClient('https://zentao.example.com:8080', 'token123', { apiVersion: 'v2' });
         expect(client.baseUrl).toBe('https://zentao.example.com:8080/api.php/v2');
     });
 
     test('preserves path prefix in server URL', () => {
-        const client = new ZentaoClient('https://zentao.example.com/zentao', 'token123');
+        const client = new ZentaoClient('https://zentao.example.com/zentao', 'token123', { apiVersion: 'v2' });
         expect(client.baseUrl).toBe('https://zentao.example.com/zentao/api.php/v2');
     });
 });
@@ -38,7 +38,7 @@ describe('ZentaoClient HTTP behavior', () => {
     }
 
     function makeClient(server: { url: URL }, token = 'test-token') {
-        return new ZentaoClient(server.url.toString(), token);
+        return new ZentaoClient(server.url.toString(), token, { apiVersion: 'v2' });
     }
 
     test('sends correct token header', async () => {
@@ -302,7 +302,7 @@ describe('ZentaoClient HTTP behavior', () => {
     });
 
     test('createClient factory works identically', () => {
-        const client = createClient('https://example.com', 'tok');
+        const client = createClient('https://example.com', 'tok', { apiVersion: 'v2' });
         expect(client.baseUrl).toBe('https://example.com/api.php/v2');
     });
 });

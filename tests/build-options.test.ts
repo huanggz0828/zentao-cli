@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test';
+import { join } from 'node:path';
 import {
     ALL_MAINSTREAM_TARGETS,
     buildCompileOptions,
@@ -54,12 +55,12 @@ describe('build script target resolution', () => {
             {
                 id: 'darwin-arm64',
                 bunTarget: 'bun-darwin-arm64',
-                outfile: 'release/zentao-cli-darwin-arm64',
+                outfile: join('release', 'zentao-cli-darwin-arm64'),
             },
             {
                 id: 'windows-x64',
                 bunTarget: 'bun-windows-x64',
-                outfile: 'release/zentao-cli-windows-x64.exe',
+                outfile: join('release', 'zentao-cli-windows-x64.exe'),
             },
         ]);
     });

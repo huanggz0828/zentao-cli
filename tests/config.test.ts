@@ -342,15 +342,17 @@ describe('profile config', () => {
     });
 
     test('setProfileConfig persists config to profile', () => {
-        saveProfile(mockProfile);
-        setProfileConfig(mockProfile, 'defaultOutputFormat', 'json');
+        const localProfile = { ...mockProfile, config: {} };
+        saveProfile(localProfile);
+        setProfileConfig(localProfile, 'defaultOutputFormat', 'json');
         const current = getCurrentProfile();
         expect(current!.config?.defaultOutputFormat).toBe('json');
     });
 
     test('updateProfile merges fields and persists', () => {
-        saveProfile(mockProfile);
-        updateProfile(mockProfile, { token: 'updated-token' });
+        const localProfile = { ...mockProfile };
+        saveProfile(localProfile);
+        updateProfile(localProfile, { token: 'updated-token' });
         const current = getCurrentProfile();
         expect(current!.token).toBe('updated-token');
         expect(current!.account).toBe('admin');

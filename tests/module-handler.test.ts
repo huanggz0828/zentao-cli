@@ -95,13 +95,24 @@ describe('delete confirmation prompt', () => {
                 env: process.env,
             });
 
-            proc.stdin.write('n\n');
-            proc.stdin.end();
+            // 实时读取 stderr，直到看见“确认删除”提示后才写入 stdin，并将其读取到最后以收集完整的 stderr
+            const reader = proc.stderr.getReader();
+            let accumulated = '';
+            let written = false;
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                accumulated += new TextDecoder().decode(value);
+                if (accumulated.includes('确认删除') && !written) {
+                    written = true;
+                    proc.stdin.write('n\n');
+                    proc.stdin.end();
+                }
+            }
+            reader.releaseLock();
 
-            const [stderr, exitCode] = await Promise.all([
-                new Response(proc.stderr).text(),
-                proc.exited,
-            ]);
+            const exitCode = await proc.exited;
+            const stderr = accumulated;
 
             expect(exitCode).toBe(0);
             expect(stderr).toContain('确认删除 2 个对象');

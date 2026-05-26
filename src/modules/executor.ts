@@ -69,7 +69,7 @@ export async function executeResolvedModuleCommand(
         }
         
         // 针对禅道 v1 API 的 browseType 兼容处理：由于 v1 接口通常不支持在服务端通过 browseType 过滤，我们在客户端进行模拟过滤
-        const isV1 = !!(client as any).v1Client || client.baseUrl.endsWith('/api.php/v1') || client.baseUrl.endsWith('/index.php');
+        const isV1 = !!(client as any).v1Client || client.baseUrl?.endsWith('/api.php/v1') || client.baseUrl?.endsWith('/index.php');
         if (isV1 && command.module === 'bug' && command.action.name === 'list') {
             const browseType = command.query?.browseType ?? 'unclosed';
             if (browseType !== 'all') {
