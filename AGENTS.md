@@ -63,6 +63,10 @@ src/
 - `bun run build:sf -- --targets=linux-x64,darwin-arm64 --outdir ./artifacts` — custom target list and output directory.
 - Published to npm as `zentao-cli`; `files` includes `bin/`, `dist/`, `skills/`.
 
+## Release
+
+To prepare a new release (bump version, update CHANGES.md, tag), follow the steps in [.claude/commands/release.md](./.claude/commands/release.md).
+
 ## Code Conventions
 
 - **Runtime**: Bun (not Node.js). TypeScript, ESNext target, bundler module resolution.
